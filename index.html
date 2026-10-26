@@ -1,0 +1,825 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>게임 플레이 타임라인 | 포트폴리오 예시</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0b1020; --panel:#121a2d; --muted:#aab5cc; --line:#33415d; --accent:#9be7c4; --text:#f4f7fb; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:radial-gradient(circle at 80% 0%, #20304a 0, var(--bg) 42%); color:var(--text); font:16px/1.65 "Segoe UI", "Malgun Gothic", sans-serif; }
+    main { width:min(1280px, 94vw); margin:0 auto; padding:48px 0 80px; }
+    .eyebrow { color:var(--accent); text-transform:uppercase; letter-spacing:.16em; font-size:12px; font-weight:700; }
+    h1 { font-size:clamp(32px,6vw,54px); line-height:1.15; margin:12px 0; }
+    .intro { color:var(--muted); max-width:650px; margin:0 0 42px; }
+    .note { display:inline-block; border:1px solid #52617d; border-radius:99px; padding:4px 12px; color:#d8e2f1; font-size:12px; margin-bottom:16px; }
+    .timeline { position:relative; padding-left:30px; }
+    .timeline::before { content:""; position:absolute; left:7px; top:8px; bottom:12px; width:2px; background:linear-gradient(var(--accent),var(--line)); }
+    article { position:relative; background:rgba(18,26,45,.9); border:1px solid #293651; border-radius:16px; padding:20px 22px; margin:0 0 18px; box-shadow:0 14px 36px #0003; }
+    article::before { content:""; position:absolute; left:-29px; top:26px; width:12px; height:12px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 5px #9be7c426; }
+    .meta { color:var(--accent); font-size:12px; font-weight:700; letter-spacing:.08em; }
+    h2 { margin:4px 0 8px; font-size:22px; }
+    p { margin:0; color:var(--muted); }
+    .tags { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+    .tag { border:1px solid #40506c; border-radius:99px; padding:3px 10px; font-size:12px; color:#dce5f3; }
+    footer { color:#7e8aa3; font-size:12px; margin:30px 0 0 30px; }
+    .topbar { position:sticky; top:0; z-index:5; background:#0b1020eF; border-bottom:1px solid #293651; backdrop-filter:blur(12px); }
+    .nav { width:min(920px,92vw); margin:0 auto; display:flex; align-items:center; justify-content:center; gap:4px; min-height:56px; overflow-x:auto; }
+    .nav button { color:#bec9db; background:transparent; border:0; border-radius:9px; padding:7px 11px; font:inherit; font-size:14px; cursor:pointer; white-space:nowrap; }
+    .nav button:hover,.nav button.active { background:#22314a; color:var(--text); }
+    [hidden] { display:none !important; }
+    .placeholder { min-height:320px; display:grid; align-content:center; padding:32px; border:1px solid #293651; border-radius:18px; background:rgba(18,26,45,.9); }
+    .placeholder h2 { font-size:28px; }
+    .portfolio-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; margin-top:28px; }
+    .work-card { min-height:260px; display:flex; flex-direction:column; padding:24px; border:1px solid #34435f; border-radius:18px; background:linear-gradient(145deg,#172239,#10182a); box-shadow:0 16px 36px #0003; color:var(--text); text-decoration:none; transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease; }
+    .work-card.guild-card { background-image:linear-gradient(90deg,rgba(11,16,32,.94) 0%,rgba(11,16,32,.78) 54%,rgba(11,16,32,.42) 100%),url("assets/guild_distribution_bg.png"); background-size:cover; background-position:center; }
+    .work-card.bounty-card { background-image:linear-gradient(90deg,rgba(11,16,32,.94) 0%,rgba(11,16,32,.78) 54%,rgba(11,16,32,.42) 100%),url("assets/bounty_system_bg.png"); background-size:cover; background-position:center; }
+    .work-card:hover { transform:translateY(-3px); border-color:var(--accent); box-shadow:0 20px 42px #0005; }
+    .work-card:focus-visible { outline:3px solid var(--accent); outline-offset:4px; }
+    .work-card::before { display:none; }
+    .work-card .doc-type { color:var(--accent); font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+    .work-card h2 { margin:12px 0 8px; font-size:24px; }
+    .work-card p { color:var(--muted); }
+    .work-card .open-link { display:inline-block; margin-top:auto; padding-top:24px; color:var(--accent); font-weight:700; }
+    @media (max-width:700px) { .portfolio-grid { grid-template-columns:1fr; } }
+    .summary { display:flex; gap:12px; flex-wrap:wrap; margin:24px 0; }
+    .summary-item { flex:1; min-width:200px; background:#152a30; border:1px solid #365b59; border-radius:14px; padding:16px 20px; }
+    .summary-item strong { display:block; color:var(--accent); font-size:20px; }
+    .summary-item span { color:#c1d4d5; font-size:13px; }
+    .chart-scroll { overflow-x:auto; border:1px solid #33415d; border-radius:16px; background:#10182a; }
+    .chart-scroll { scrollbar-width:none; }
+    .chart-scroll::-webkit-scrollbar { display:none; }
+    .chart { min-width:940px; position:relative; }
+    .chart-row { display:grid; grid-template-columns:215px 1fr; min-height:72px; }
+    .chart-row:last-child { border-bottom:0; }
+    .row-label { position:sticky; left:0; z-index:3; background:#121d30; padding:15px 12px; border-right:1px solid #33415d; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+    .row-label strong { display:block; font-size:14px; white-space:nowrap; }
+    .row-label small { color:var(--muted); font-size:12px; }
+    .chart-row.current .row-label { background:#173136; }
+    .track { position:relative; min-height:72px; }
+    .track { margin-right:48px; }
+    .gridline { position:absolute; top:0; bottom:0; border-left:1px solid #ffffff0c; pointer-events:none; }
+    .axis { min-height:62px; background:#10182a; }
+    .axis .track { min-height:62px; }
+    .axis-label { position:absolute; top:44px; transform:translate(10px, -50%); color:#c8d5e8; font-size:11px; white-space:nowrap; text-align:left; }
+    .axis-dot { position:absolute; top:40px; width:7px; height:7px; border-radius:50%; background:#b8cbe3; transform:translateX(-50%); z-index:2; }
+    .axis .gridline { top:44px; }
+    .now-label { position:absolute; top:36px; transform:translateX(-100%); color:var(--accent); font-size:10px; white-space:nowrap; padding-right:5px; }
+    .play-bar { position:absolute; top:21px; height:30px; min-width:8px; background:var(--bar); border:1px solid #ffffff4d; border-radius:7px; cursor:pointer; padding:0; z-index:2; }
+    .play-bar:hover { filter:brightness(1.12); outline:none; }
+    .play-bar:focus-visible { filter:brightness(1.12); outline:2px solid #22796c; outline-offset:2px; }
+    .play-bar.live { box-shadow:0 0 16px #9be7c433; border-color:#d5fff0; }
+    .play-bar { color:#102134; font-size:11px; font-weight:700; overflow:hidden; white-space:nowrap; }
+    .play-bar.connected-left { border-top-left-radius:0; border-bottom-left-radius:0; border-left:0; }
+    .play-bar.connected-right { border-top-right-radius:0; border-bottom-right-radius:0; border-right:0; }
+    .lane-name { position:absolute; left:8px; color:#91a5c2; font-size:10px; }
+    .legend { display:flex; gap:18px; margin:0; color:#bec9db; font-size:13px; }
+    .legend i { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:6px; }
+    .chart-help { font-size:16px; font-weight:800; color:#ffdf5d; margin:0; text-align:center; }
+    .chart-controls { position:relative; min-height:44px; margin:16px 0; display:flex; align-items:center; }
+    .chart-controls .chart-help { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:max-content; max-width:calc(100% - 180px); }
+    .selection { margin-top:16px; padding:18px 22px; border:1px solid #40506c; border-radius:12px; min-height:102px; background:#172238; font-size:15px; }
+    .selection strong { display:block; margin-bottom:4px; }
+    .activity-story { display:grid; grid-template-columns:minmax(240px, 44%) 1fr; gap:28px; align-items:center; margin-top:20px; }
+    .activity-story img { display:block; width:100%; height:auto; border-radius:10px; }
+    .activity-story figure { margin:0; }
+    .activity-story figcaption { margin-top:8px; color:var(--muted); font-size:12px; }
+    .activity-story p { color:#e1e8f2; font-size:15px; line-height:1.9; }
+    .odin-story { grid-template-columns:minmax(0, 360px) minmax(0, 1fr); }
+    .trade-story { grid-template-columns:minmax(0, 60%) minmax(0, 1fr); }
+    .vampir-story { grid-template-columns:minmax(0, 540px) minmax(0, 1fr); }
+    .activity-gallery { display:flex; align-items:flex-start; gap:24px; flex-wrap:wrap; margin-top:20px; }
+    .activity-gallery figure { margin:0; max-width:100%; }
+    .activity-gallery img { display:block; max-width:100%; height:auto; border-radius:8px; }
+    .activity-gallery .activity-photo { width:516px; }
+    .activity-gallery .ranking-photo { width:192px; }
+    .activity-gallery a { display:block; }
+    .activity-gallery figcaption { margin-top:8px; color:var(--muted); font-size:12px; }
+    .zeus-gallery { display:flex; flex-wrap:wrap; align-items:flex-start; gap:24px; margin-top:20px; }
+    .zeus-gallery img { display:block; width:100%; height:auto; border-radius:10px; }
+    .zeus-gallery figure { margin:0; max-width:100%; }
+    .zeus-gallery figcaption, .character-figure figcaption { margin-top:8px; color:var(--muted); font-size:12px; }
+    .character-figure { margin:20px 0 0; max-width:345px; }
+    .zeus-gallery .zeus-character { max-width:240px; }
+    .zeus-gallery .zeus-chat { max-width:205px; }
+    .guild-detail { display:grid; grid-template-columns:minmax(0, 1.5fr) minmax(0, 1fr); gap:28px; align-items:center; margin-top:20px; }
+    .guild-detail .activity-gallery { margin-top:0; flex-wrap:nowrap; gap:16px; }
+    .guild-detail .activity-photo { flex:1; min-width:0; }
+    .guild-detail .ranking-photo { width:120px; flex-shrink:0; }
+    .guild-detail .ranking-photo img { width:76px; margin-left:12px; }
+    .activity-gallery .ranking-photo figcaption { white-space:nowrap; width:max-content; text-align:center; position:relative; left:50px; transform:translateX(-50%); }
+    .selection figcaption { text-align:center; }
+    .trade-story figure { max-width:700px; }
+    .guild-story p { color:#e1e8f2; font-size:15px; line-height:1.9; }
+    .guild-story p + p { margin-top:18px; }
+    @media (min-width:851px) {
+      .selection:has(> .activity-story), .selection:has(> .guild-detail) { display:grid; grid-template-columns:minmax(240px, 44%) minmax(0, 1fr); column-gap:28px; }
+      .selection:has(> .trade-story) { grid-template-columns:minmax(0, 60%) minmax(0, 1fr); }
+      .selection:has(> .odin-story) { grid-template-columns:minmax(0, 360px) minmax(0, 1fr); }
+      .selection:has(> .vampir-story) { grid-template-columns:minmax(0, 540px) minmax(0, 1fr); }
+      .selection:has(> .guild-detail) { grid-template-columns:minmax(0, 1.5fr) minmax(0, 1fr); }
+      .selection:has(> .activity-story) > strong, .selection:has(> .activity-story) > p,
+      .selection:has(> .guild-detail) > strong, .selection:has(> .guild-detail) > p { grid-column:1; }
+      .selection > .activity-story, .selection > .guild-detail { display:contents; }
+      .selection > .activity-story > figure, .selection > .activity-story > img,
+      .selection > .guild-detail > .activity-gallery { grid-column:1; grid-row:3; margin-top:20px; }
+      .selection > .activity-story > p, .selection > .guild-detail > .guild-story { grid-column:2; grid-row:1 / 4; align-self:center; }
+    }
+    @media (max-width:850px) { .guild-detail { grid-template-columns:1fr; } }
+    @media (max-width:650px) { .activity-story { grid-template-columns:1fr; gap:18px; } }
+    @media (max-width:600px) { .nav { gap:2px; } .nav button { padding:7px 9px; font-size:13px; } main { padding-top:40px; } }
+    :root { color-scheme:light; --bg:#f6f7f5; --panel:#fff; --muted:#586878; --line:#d9dfdc; --accent:#22796c; --text:#203342; }
+    body { background:linear-gradient(180deg,#f1f6f5 0,#f7f8f6 300px,#f5f6f4 100%); color:var(--text); }
+    .topbar { background:rgba(255,255,255,.94); border-bottom-color:#dce4e0; box-shadow:0 2px 12px #2033420a; }
+    .nav button { color:#4e6070; border:1px solid transparent; border-radius:8px; }
+    .nav button:hover,.nav button.active { background:#e8f1ed; color:#1d554d; border-color:#d7e6df; }
+    .eyebrow { color:#22796c; }
+    h1,h2 { color:#203342; text-shadow:none; }
+    .intro { color:#586878; }
+    .note { border-color:#d9dfdc; color:#536572; background:#fff; border-radius:99px; box-shadow:none; }
+    .timeline::before { background:linear-gradient(#22796c,#d9dfdc); }
+    article { background:#fff; border-color:#dce3df; border-radius:14px; box-shadow:0 8px 24px #2033420b; }
+    article::before { background:#22796c; box-shadow:0 0 0 5px #22796c18; }
+    .meta { color:#22796c; }
+    .tag { border-color:#d9e1dc; color:#465a67; background:#f7f9f7; border-radius:99px; }
+    footer { color:#74818a; }
+    .summary-item { background:#fff; border-color:#e0e6e2; border-radius:12px; box-shadow:0 5px 16px #20334208; }
+    .summary-item strong { color:#22796c; }
+    .summary-item span { color:#586878; }
+    .chart-scroll { border:2px solid #7e998c; background:#e5eee9; border-radius:12px; box-shadow:0 12px 28px #20334220; }
+    .chart-row { border-bottom:1px solid #edf0ed; }
+    .row-label { background:#f6f8f6; border-right-color:#e0e6e2; color:#263b49; }
+    .row-label small { color:#667681; }
+    .chart-row.current .row-label { background:#eaf2ee; }
+    .gridline { border-left-color:#42596b18; }
+    .axis { background:#f4f6f4; }
+    .axis-label { color:#465b69; font-weight:700; }
+    .axis-dot { background:#a17a3f; }
+    .now-label { color:#8b682f; font-weight:700; }
+    .lane-name { color:#5d6d78; font-weight:700; }
+    .legend { color:#405462; font-weight:700; }
+    .legend i { border:1px solid #75838b; }
+    .chart-help { padding:6px 14px; border:1px solid #ead177; border-radius:99px; background:#fff7d8; color:#745700; box-shadow:0 3px 10px #9a741b16; text-shadow:none; }
+    .selection { background:#e5eee9; border:2px solid #7e998c; color:#000; font-family:inherit; border-radius:12px; box-shadow:0 12px 28px #20334220; }
+    .selection * { color:#000 !important; font-family:inherit; }
+    .activity-story p,.guild-story p { color:#000; }
+    .activity-story figcaption,.activity-gallery figcaption,.zeus-gallery figcaption,.character-figure figcaption { color:#000; }
+    .profile-layout { display:block; }
+    .intro-top { display:grid; grid-template-columns:minmax(270px,.8fr) minmax(0,1.45fr); gap:24px; align-items:stretch; }
+    .profile-card { padding:22px; border:1px solid #dce3df; border-radius:16px; background:#fff; box-shadow:0 10px 30px #2033420b; }
+    .portrait-space { width:66.666%; margin:0 auto; overflow:hidden; border:1px solid #dce3df; border-radius:10px; background:#f6f8f6; }
+    .portrait-space img { display:block; width:100%; height:auto; object-fit:contain; object-position:center; }
+    .profile-card h1 { margin:20px 0 4px; font-size:28px; color:#203342; }
+    .profile-subtitle { margin:0 0 18px; color:#22796c; font-size:13px; }
+    .profile-details { display:grid; gap:0; margin:0; }
+    .profile-details div { display:grid; grid-template-columns:58px minmax(0,1fr); gap:10px; padding:10px 0; border-top:1px solid #edf0ed; }
+    .profile-details dt { color:#74818a; font-size:13px; }
+    .profile-details dd { margin:0; color:#263b49; font-size:14px; font-weight:600; overflow-wrap:anywhere; }
+    .profile-details .email-row dd { white-space:nowrap; overflow-wrap:normal; font-size:13px; }
+    .profile-main { padding:clamp(24px,5vw,48px); border:1px solid #dce3df; border-radius:18px; background:linear-gradient(145deg,#fff,#f2f7f4); box-shadow:0 10px 30px #2033420a; }
+    .profile-main h2 { margin:10px 0 14px; font-size:clamp(16px,2.3vw,28px); line-height:1.45; color:#203342; }
+    .profile-main h2 span { display:block; white-space:nowrap; }
+    .profile-main > p { color:#586878; line-height:1.9; }
+    .interest-list { display:flex; flex-wrap:wrap; gap:9px; margin-top:24px; }
+    .interest-list span { padding:7px 12px; border:1px solid #d6e4dd; border-radius:99px; background:#edf5f0; color:#285d50; font-size:13px; box-shadow:none; }
+    .experience-highlight { display:grid; grid-template-columns:minmax(250px,.82fr) minmax(0,1.18fr); gap:32px; align-items:center; margin-top:24px; padding:clamp(24px,4vw,42px); border:1px solid #dce3df; border-radius:18px; background:#fff; box-shadow:0 10px 30px #2033420a; }
+    .experience-highlight h2 { margin:10px 0 14px; font-size:clamp(22px,3vw,30px); line-height:1.45; }
+    .experience-highlight p { color:#586878; line-height:1.9; }
+    .guild-levels { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .guild-level { min-height:104px; display:flex; flex-direction:column; justify-content:center; padding:16px 18px; border:1px solid #dce8e1; border-radius:12px; background:#f5f8f5; }
+    .guild-level span { color:#7d8b85; font-size:11px; font-weight:700; letter-spacing:.12em; }
+    .guild-level strong { margin-top:5px; color:#285d50; font-size:16px; }
+    .economy-highlight { margin-top:20px; }
+    .economy-data { display:grid; gap:20px; }
+    .economy-group h3 { margin:0 0 10px; color:#285d50; font-size:15px; }
+    .monthly-amounts { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; }
+    .economy-amount { min-width:0; padding:11px 8px; border:1px solid #d2e0d8; border-radius:10px; background:#edf4f0; text-align:center; }
+    .economy-amount span { display:block; color:#61756a; font-size:11px; }
+    .economy-amount strong { display:block; margin-top:4px; color:#203b30; font-size:13px; white-space:nowrap; }
+    .trade-amounts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+    @media (max-width:760px) { .economy-highlight { grid-template-columns:1fr; gap:22px; } }
+    @media (max-width:520px) { .monthly-amounts { grid-template-columns:repeat(3,minmax(0,1fr)); } .trade-amounts { grid-template-columns:1fr; } }
+    @media (max-width:760px) { .intro-top { grid-template-columns:1fr; } }
+    @media (max-width:760px) { .experience-highlight { grid-template-columns:1fr; gap:22px; } }
+    @media (max-width:460px) { .guild-levels { grid-template-columns:1fr; } .guild-level { min-height:78px; } }
+    @media (max-width:600px) { .profile-main h2 { font-size:clamp(13px,3.6vw,18px); } }
+    .work-card { border-color:#dce3df; border-radius:16px; box-shadow:0 10px 30px #20334214; background-color:#253b3e; }
+    .work-card.guild-card { background-image:linear-gradient(90deg,rgba(25,42,45,.86) 0%,rgba(25,42,45,.67) 54%,rgba(25,42,45,.34) 100%),url("assets/guild_distribution_bg.png"); }
+    .work-card.bounty-card { background-image:linear-gradient(90deg,rgba(25,42,45,.86) 0%,rgba(25,42,45,.67) 54%,rgba(25,42,45,.34) 100%),url("assets/bounty_system_bg.png"); }
+    .work-card h2 { color:#fff; text-shadow:none; }
+    .work-card p { color:#eef3f2; }
+    .work-card .open-link,.work-card .doc-type { color:#aee3d1; }
+    @media (max-width:600px) { .hero-banner { min-height:260px; padding:24px; background-position:center; } }
+    /* Passion-led introduction */
+    body { background:#f7f6f2; }
+    .passion-masthead { display:flex; justify-content:space-between; gap:16px; color:#82847e; font-size:11px; font-weight:700; letter-spacing:.12em; padding-bottom:32px; }
+    .passion-hero { display:grid; grid-template-columns:1.1fr 1fr; align-items:center; gap:24px; min-height:600px; padding:12px 0 60px; }
+    .passion-kicker { font-size:14px; color:#686c64; margin-bottom:24px; }
+    .passion-copy h1 { margin:0; font-size:clamp(42px,4.8vw,68px); line-height:1.22; letter-spacing:-.065em; font-weight:900; color:#20251f; }
+    .passion-copy h1 em { font-style:normal; color:#b14b30; }
+    .passion-copy h1 > span { font-size:.76em; }
+    .passion-copy > p { margin-top:30px; font-size:18px; line-height:1.85; color:#62665e; }
+    .passion-copy > p strong { color:#262d24; }
+    .passion-actions { display:flex; flex-wrap:wrap; gap:12px; margin-top:32px; }
+    .passion-actions button { padding:13px 18px; border:1px solid #c8ccc0; background:transparent; color:#303b2a; font:inherit; font-size:13px; font-weight:700; cursor:pointer; }
+    .passion-actions button:first-child { background:#303f30; border-color:#303f30; color:#fff; }
+    .passion-actions button span { margin-left:20px; }
+    .passion-actions button:hover { transform:translateY(-2px); }
+    .passion-actions button:focus-visible { outline:3px solid #b14b30; outline-offset:4px; }
+    .passion-visual { position:relative; height:490px; min-width:0; }
+    .game-print { position:absolute; background:#fff; padding:10px 10px 12px; box-shadow:0 14px 36px #25271c22; width:80%; }
+    .game-print img { width:100%; height:200px; object-fit:cover; object-position:center; display:block; }
+    .game-print span { display:block; margin-top:9px; color:#596055; font-size:10px; letter-spacing:.05em; }
+    .print-back { top:10px; right:0; transform:rotate(7deg); }
+    .print-front { top:188px; left:0; transform:rotate(-6deg); }
+    .passion-portrait { position:absolute; right:0; bottom:0; width:29%; background:#e7e7df; border:7px solid #fff; box-shadow:0 8px 22px #25271c22; transform:rotate(4deg); }
+    .passion-portrait img { display:block; width:100%; height:170px; object-fit:cover; object-position:top; }
+    .visual-caption { position:absolute; left:16px; bottom:0; font-size:10px; letter-spacing:.15em; font-weight:700; color:#878b7c; }
+    .passion-info { display:grid; grid-template-columns:1.1fr 1fr 1fr; border-top:1px solid #d9dcd2; border-bottom:1px solid #d9dcd2; margin:0 0 54px; padding:30px 0; }
+    .passion-info > section { padding:0 25px; border-left:1px solid #d9dcd2; min-width:0; }
+    .passion-info > section:first-child { border-left:0; padding-left:0; }
+    .passion-info > section:last-child { padding-right:0; }
+    .passion-info h2 { font-size:10px; letter-spacing:.1em; color:#838976; margin:0 0 20px; }
+    .passion-info h3 { font-size:16px; line-height:1.6; color:#303b2a; margin:0 0 10px; }
+    .passion-info p { font-size:13px; line-height:1.9; color:#73796d; }
+    .passion-info .profile-details div { grid-template-columns:58px minmax(0,1fr); padding:5px 0; border:0; }
+    .passion-info .profile-details dd,.passion-info .profile-details dt { font-size:12px; }
+    .passion-info .profile-details a { color:inherit; text-decoration:none; }
+    .design-topics { display:flex; flex-wrap:wrap; gap:6px; margin-top:15px; }
+    .design-topics span { font-size:10px; border:1px solid #d9dcd2; padding:3px 9px; border-radius:20px; color:#5c6653; }
+    @media(max-width:1000px) { .passion-info { grid-template-columns:1fr 1fr; } .passion-info > section:last-child { grid-column:1 / -1; border:0; border-top:1px solid #d9dcd2; margin-top:24px; padding:24px 0 0; } .passion-visual { height:430px; } .game-print img { height:170px; } .print-front { top:160px; } }
+    @media(max-width:760px) { .passion-hero { grid-template-columns:1fr; padding-top:0; gap:35px; } .passion-copy h1 { font-size:clamp(38px,8vw,60px); } .passion-visual { max-width:530px; width:100%; justify-self:center; height:450px; } .passion-masthead { font-size:9px; } .passion-copy > p { font-size:16px; } }
+    @media(max-width:520px) { .passion-info { grid-template-columns:1fr; } .passion-info > section { border:0; padding:24px 0; border-bottom:1px solid #d9dcd2; } .passion-info > section:first-child { padding-top:0; } .passion-info > section:last-child { margin:0; border:0; padding-bottom:0; } .passion-masthead > span:last-child { display:none; } .passion-visual { height:390px; } .game-print img { height:145px; } .print-front { top:145px; } .passion-portrait img { height:125px; } }
+    .commitment-box { margin-top:32px; padding:36px; background:#eeeee7; border:1px solid #d9dcd2; border-radius:18px; }
+    .commitment-heading { display:grid; grid-template-columns:1.2fr 1fr; align-items:end; gap:28px; margin-bottom:28px; }
+    .commitment-heading h2 { margin:12px 0 0; font-size:clamp(24px,3vw,36px); line-height:1.4; letter-spacing:-.045em; color:#293528; }
+    .commitment-heading p { font-size:14px; line-height:1.9; color:#68705f; }
+    .commitment-proof { margin:0; }
+    .commitment-proof a { display:block; border-radius:10px; overflow:hidden; background:#000; }
+    .commitment-proof a:focus-visible { outline:3px solid #b14b30; outline-offset:4px; }
+    .commitment-proof img { display:block; width:100%; height:auto; }
+    .commitment-proof figcaption { display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; margin-top:13px; color:#757d6d; font-size:11px; }
+    @media(max-width:760px) { .commitment-box { padding:22px; } .commitment-heading { grid-template-columns:1fr; gap:16px; } }
+    .purchase-proofs { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:30px; padding-top:28px; border-top:1px solid #d2d6c9; }
+    .purchase-proofs figure { margin:0; min-width:0; }
+    .purchase-title { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:8px; }
+    .purchase-title h3 { margin:0; font-size:18px; color:#293528; }
+    .purchase-title strong { color:#b14b30; font-size:18px; }
+    .purchase-proofs p { margin:6px 0 14px; font-size:12px; color:#737b6b; }
+    .purchase-proofs a { display:block; background:#fff; border:1px solid #d9dcd2; border-radius:8px; overflow:hidden; }
+    .purchase-proofs img { display:block; width:100%; height:auto; }
+    @media(max-width:900px) { .purchase-proofs { grid-template-columns:1fr; } }
+    .commitment-proof { width:66.6667%; margin:0 auto; }
+    .payment-strip { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; background:transparent; }
+    .payment-record { min-width:0; overflow:hidden; border-radius:5px; }
+    .payment-record svg { display:block; width:100%; height:auto; }
+    @media(max-width:760px) { .commitment-proof { width:100%; overflow-x:auto; } .payment-strip { min-width:750px; } }
+    .purchase-proofs { grid-template-columns:1fr; width:66.6667%; margin:28px auto 0; gap:28px; }
+    .purchase-proofs figure + figure { border-top:1px solid #d2d6c9; padding-top:28px; }
+    @media(max-width:760px) { .purchase-proofs { width:100%; } }
+    .commitment-heading { grid-template-columns:1fr; gap:16px; align-items:start; margin-bottom:32px; }
+    .commitment-heading p { max-width:720px; margin:0; font-size:15px; line-height:1.9; text-wrap:pretty; }
+    .purchase-title h3 { font-family:"Arial Black","Malgun Gothic",sans-serif; font-size:24px; font-weight:900; letter-spacing:-.055em; line-height:1.4; color:#202b20; }
+    @media(max-width:520px) { .purchase-title h3 { font-size:21px; } }
+    .payment-description { margin:6px 0 14px; font-size:12px; line-height:1.9; color:#737b6b; }
+    .purchase-proofs .purchase-caption { margin-top:13px; text-align:right; color:#757d6d; font-size:11px; }
+    .reinvestment-box { margin-top:28px; padding:36px; background:#f2f5ef; border:1px solid #d9dcd2; border-radius:18px; }
+    .reinvestment-box > h2 { margin:12px 0 16px; font-size:clamp(24px,3vw,36px); line-height:1.4; letter-spacing:-.045em; color:#293528; }
+    .reinvestment-intro { max-width:740px; font-size:15px; line-height:1.9; color:#68705f; }
+    .reinvestment-flow { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin:24px 0 32px; font-size:12px; font-weight:700; color:#53654b; }
+    .reinvestment-flow span:nth-child(odd) { border-bottom:2px solid #b8c8ac; padding:6px 0; }
+    .yearly-records { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:22px; padding-top:28px; border-top:0; }
+    .yearly-records figure { margin:0; min-width:0; }
+    .yearly-record-heading { display:flex; align-items:baseline; gap:10px; margin-bottom:14px; }
+    .yearly-record-heading h3 { font-family:"Arial Black","Malgun Gothic",sans-serif; font-size:26px; font-weight:900; color:#293528; margin:0; }
+    .yearly-record-heading span { font-size:12px; color:#737b6b; }
+    .yearly-records a { display:block; border:1px solid #dde2d7; border-radius:8px; overflow:hidden; background:#fff; }
+    .yearly-records a:focus-visible { outline:3px solid #b14b30; outline-offset:4px; }
+    .yearly-records img { display:block; width:100%; height:auto; }
+    .yearly-records figcaption { margin-top:13px; text-align:right; font-size:11px; color:#757d6d; }
+    @media(max-width:1000px) { .yearly-records { grid-template-columns:1fr; max-width:720px; margin:0 auto; } }
+    @media(max-width:760px) { .reinvestment-box { padding:22px; } .reinvestment-flow { gap:8px; font-size:11px; } }
+    .economy-insight { max-width:840px; margin-top:18px; padding-left:18px; border-left:3px solid #b8c8ac; font-size:14px; line-height:1.95; color:#596650; text-wrap:pretty; }
+    .yearly-records-caption { margin:13px 0 0; text-align:right; font-size:11px; color:#757d6d; }
+    .play-timeline-title { font-size:clamp(24px,3.5vw,38px); line-height:1.35; letter-spacing:-.04em; }
+    .other-games { margin-top:56px; padding-top:32px; border-top:1px solid #d9dcd2; }
+    .other-games > h2 { margin:10px 0 24px; font-size:clamp(22px,2.5vw,28px); letter-spacing:-.04em; color:#293528; }
+    .other-games-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:18px; }
+    .other-games-grid figure { margin:0; min-width:0; }
+    .other-game-image { aspect-ratio:4 / 3; display:flex; align-items:center; justify-content:center; overflow:hidden; background:#fff; border:1px solid #dce1d7; border-radius:10px; }
+    .other-game-image.dark { background:#000; }
+    .other-game-image img { display:block; width:100%; height:100%; object-fit:contain; }
+    .other-games-grid figcaption { margin-top:12px; font-size:14px; font-weight:700; color:#303b2a; }
+    @media(max-width:900px) { .other-games-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+    @media(max-width:520px) { .other-games-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; } .other-games-grid figcaption { font-size:12px; } }
+    .channel-activity { margin-top:28px; padding:36px; border:1px solid #d9dcd2; border-radius:18px; background:#fff; }
+    .channel-activity h2 { margin:12px 0 20px; font-size:clamp(26px,3.4vw,42px); line-height:1.35; letter-spacing:-.045em; color:#293528; }
+    .channel-activity > p { max-width:800px; font-size:16px; line-height:1.9; color:#68705f; }
+    .channel-activity figure { margin:30px 0 0; }
+    .channel-activity figure a { display:block; border:1px solid #e0e4dc; border-radius:10px; overflow:hidden; }
+    .channel-activity img { display:block; width:100%; height:auto; }
+    .channel-activity figcaption { margin-top:13px; text-align:right; font-size:11px; color:#757d6d; }
+    @media(max-width:760px) { .channel-activity { padding:22px; } }
+    .channel-activity { display:grid; grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr); column-gap:36px; align-items:start; }
+    .channel-activity > .eyebrow { grid-column:1; grid-row:1; }
+    .channel-activity > h2 { grid-column:1; grid-row:2; font-size:clamp(24px,2.6vw,34px); margin:12px 0 18px; }
+    .channel-activity > p { grid-column:1; grid-row:3; font-size:14px; }
+    .channel-activity > figure { grid-column:2; grid-row:1 / 5; margin:0; width:100%; max-width:620px; justify-self:center; align-self:center; }
+    .channel-activity figure a { background:#f6f7f3; }
+    .channel-activity img { max-height:350px; object-fit:contain; }
+    .campus-activity img { max-height:320px; }
+    @media(max-width:900px) {
+      .channel-activity { grid-template-columns:1fr; }
+      .channel-activity > .eyebrow,.channel-activity > h2,.channel-activity > p,.channel-activity > figure { grid-column:1; grid-row:auto; }
+      .channel-activity > figure { margin-top:24px; max-width:640px; }
+      .channel-activity img { max-height:340px; }
+    }
+    .experience-highlight:has(#guild-experience-title) { background:#eeeee7; border:1px solid #d9dcd2; border-radius:18px; box-shadow:none; padding:36px; }
+    .experience-highlight:has(#guild-experience-title) .eyebrow { color:#737d65; }
+    #guild-experience-title { color:#293528; letter-spacing:-.045em; }
+    .experience-highlight:has(#guild-experience-title) p { color:#68705f; }
+    .experience-highlight:has(#guild-experience-title) .guild-level { background:#f7f6f2; border:1px solid #d2d6c9; box-shadow:none; }
+    .experience-highlight:has(#guild-experience-title) .guild-level span { color:#838976; }
+    .experience-highlight:has(#guild-experience-title) .guild-level strong { color:#303b2a; }
+    @media(max-width:760px) { .experience-highlight:has(#guild-experience-title) { padding:22px; } }
+    .experience-highlight:has(#guild-experience-title) .guild-levels { grid-template-columns:1fr; gap:12px; }
+    .experience-highlight:has(#guild-experience-title) .guild-level { min-height:90px; padding:18px 22px; }
+.experience-highlight:has(#guild-experience-title) .guild-master-description { margin:10px 0 16px; font-size:13px; line-height:1.8; }
+.guild-master-images { display:grid; grid-template-columns:minmax(0,1fr) 65px; gap:12px; align-items:start; }
+.guild-master-images a { display:block; min-width:0; border-radius:6px; overflow:hidden; border:1px solid #d2d6c9; background:#f7f6f2; }
+.guild-master-images img { display:block; width:100%; height:190px; object-fit:contain; object-position:top; }
+@media(max-width:520px) { .guild-master-images img { height:150px; } .guild-master-images { grid-template-columns:minmax(0,1fr) 50px; gap:8px; } }
+    .guild-master-images { display:flex; align-items:flex-start; gap:16px; }
+    .guild-master-images a { border:0; border-radius:0; background:transparent; overflow:visible; flex:0 1 auto; }
+    .guild-master-images img { width:auto; max-width:100%; height:190px; object-fit:contain; }
+    @media(max-width:520px) { .guild-master-images { gap:10px; } .guild-master-images img { height:150px; } }
+    .execution-highlight { display:grid; grid-template-columns:1.2fr 1fr; align-items:center; gap:40px; margin-top:28px; padding:36px; border:1px solid #d9dcd2; border-radius:18px; background:#eeeee7; }
+    .execution-highlight .eyebrow { color:#737d65; }
+    .execution-highlight h2 { margin:12px 0 18px; font-size:clamp(24px,3vw,36px); line-height:1.4; letter-spacing:-.045em; color:#293528; }
+    .execution-highlight p { max-width:620px; font-size:14px; line-height:1.9; color:#68705f; }
+    .execution-highlight button { display:inline-flex; align-items:center; gap:24px; margin-top:24px; padding:11px 16px; border:1px solid #303f30; background:#303f30; color:#fff; font:inherit; font-size:13px; font-weight:700; cursor:pointer; }
+    .execution-highlight button:focus-visible { outline:3px solid #b14b30; outline-offset:4px; }
+    .execution-results { display:grid; gap:18px; border-left:1px solid #d2d6c9; padding-left:32px; }
+    .execution-results > div { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:8px 16px; }
+    .execution-results strong { font-size:clamp(24px,2.6vw,34px); font-weight:900; letter-spacing:-.05em; color:#303b2a; }
+    .execution-results span { font-size:12px; color:#737b6b; }
+    @media(max-width:760px) { .execution-highlight { grid-template-columns:1fr; padding:22px; gap:28px; } .execution-results { border-left:0; border-top:1px solid #d2d6c9; padding:22px 0 0; } }
+    .channel-activity > .channel-status { grid-column:1; grid-row:4; margin-top:14px; font-size:13px; line-height:1.8; color:#737b6b; }
+    @media(max-width:900px) { .channel-activity > .channel-status { grid-row:auto; } }
+    .first-line-gallery { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:16px; }
+    .first-line-gallery figure { margin:0; min-width:0; }
+    .first-line-gallery a { display:block; }
+    .first-line-gallery img { display:block; width:100%; height:110px; object-fit:contain; }
+    .first-line-gallery figcaption { margin-top:8px; font-size:11px; font-weight:600; color:#68705f; }
+    @media(max-width:520px) { .first-line-gallery { grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; } .first-line-gallery img { height:auto; max-height:190px; object-position:left; } }
+    .first-line-gallery img { width:100%; height:120px; object-fit:cover; object-position:center; }
+    @media(max-width:520px) { .first-line-gallery img { height:180px; max-height:none; object-fit:cover; object-position:center; } }
+    .parallel-game-story { align-items:center; }
+    .parallel-game-story > p { margin:0 !important; align-self:center; }
+    /* Portrait to the left of the game photographs. */
+    .passion-hero { grid-template-columns:1fr 1.2fr; gap:30px; }
+    .passion-visual { display:grid; grid-template-columns:minmax(140px,.805fr) minmax(0,1.195fr); gap:18px 20px; height:auto; align-items:center; padding:12px 0; }
+    .passion-visual .game-print { position:relative; inset:auto; width:100%; margin:0; padding:8px 8px 12px; }
+    .passion-visual .game-print img { height:auto; aspect-ratio:16 / 10; object-fit:cover; }
+    .passion-visual .print-back { grid-column:2; grid-row:1; width:90%; justify-self:end; transform:rotate(3deg); z-index:2; }
+    .passion-visual .print-front { grid-column:2; grid-row:2; width:90%; justify-self:start; transform:rotate(-3deg); margin-top:-34px; z-index:1; }
+    .passion-visual .passion-portrait { position:relative; inset:auto; grid-column:1; grid-row:1 / 3; width:100%; border:7px solid #fff; transform:rotate(-2deg); }
+    .passion-visual .passion-portrait img { height:auto; aspect-ratio:3 / 4; object-fit:cover; object-position:top; }
+    .passion-visual .visual-caption { position:static; grid-column:1 / -1; grid-row:3; margin-top:8px; }
+    @media(max-width:1000px) and (min-width:761px) { .passion-hero { grid-template-columns:1fr; } .passion-visual { width:100%; max-width:650px; justify-self:center; } }
+    @media(max-width:760px) { .passion-hero { grid-template-columns:1fr; } .passion-visual { max-width:650px; height:auto; } }
+    @media(max-width:520px) { .passion-visual { grid-template-columns:minmax(100px,.805fr) minmax(0,1.195fr); gap:16px 12px; height:auto; } .passion-visual .passion-portrait { border-width:5px; } .passion-visual .game-print { padding:5px 5px 8px; } .passion-visual .game-print span { font-size:8px; } }
+    /* Consistent shadows for portfolio images. */
+    img, .payment-record svg { box-shadow:0 5px 14px rgba(37,39,28,.18); }
+    .play-dialog { width:min(1100px,94vw); max-width:none; max-height:90dvh; padding:0 22px 22px; border:1px solid #c8d3ca; border-radius:16px; background:#f7f6f2; color:#20251f; box-shadow:0 24px 80px #0005; overflow:auto; }
+    .play-dialog::backdrop { background:rgba(20,28,23,.6); }
+    .play-dialog-toolbar { position:sticky; top:0; z-index:10; display:flex; justify-content:flex-end; padding:10px 0; background:#f7f6f2; }
+    .play-dialog-close { display:grid; place-items:center; width:40px; height:40px; padding:0; border:1px solid #c8d3ca; border-radius:50%; background:#fff; color:#303b2a; font:30px/1 sans-serif; cursor:pointer; }
+    .play-dialog-close:focus-visible { outline:3px solid #22796c; outline-offset:2px; }
+    .play-dialog .selection { margin-top:0; }
+    html:has(.play-dialog[open]) { overflow:hidden; }
+    @media(max-width:520px) { .play-dialog { padding:0 12px 12px; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <nav class="nav" aria-label="포트폴리오 메뉴">
+      <button class="active" type="button" data-page="intro">소개</button>
+      <button type="button" data-page="games">플레이 경험</button>
+      <button type="button" data-page="activities">활동</button>
+      <button type="button" data-page="projects">포트폴리오</button>
+    </nav>
+  </header>
+  <main>
+    <section class="profile-layout" data-view="intro">
+      <div class="passion-masthead"><span>PORTFOLIO</span></div>
+      <div class="passion-hero">
+        <div class="passion-copy">
+          <div class="passion-kicker">가장 좋아하는 장르를, 가장 깊이 들여다봅니다.</div>
+          <h1>리니지 라이크에<br><em>미친 기획자</em><br><span>이기훈입니다.</span></h1>
+          <p>라인의 경쟁도, 중립의 성장도.<br>직접 부딪히며 쌓은 플레이 경험을<br><strong>게임 기획으로 연결합니다.</strong></p>
+          <div class="passion-actions"><button type="button" data-jump="games">플레이 경험 보기 <span>↗</span></button><button type="button" data-jump="activities">활동 보기 <span>↗</span></button><button type="button" data-jump="projects">포트폴리오 보기 <span>↗</span></button></div>
+        </div>
+        <div class="passion-visual" aria-label="직접 플레이한 게임 기록과 프로필 사진">
+          <div class="game-print print-back"><img src="assets/rowein-line-original.png" alt="로드나인 라인 플레이 기록"><span>경쟁의 한가운데서</span></div>
+          <div class="game-print print-front"><img src="assets/garbana-joker-guild.png" alt="길드 플레이 기록"><span>함께 만드는 플레이</span></div>
+          <div class="passion-portrait"><img src="assets/profile-photo.png" alt="게임 기획자 이기훈 프로필 사진"></div>
+          <div class="visual-caption">PLAY DEEPLY.<br>DESIGN FROM EXPERIENCE.</div>
+        </div>
+      </div>
+      <div class="passion-info">
+        <section class="personal-info"><h2>PROFILE / 이기훈</h2><dl class="profile-details">
+          <div><dt>생년월일</dt><dd>1999.08.07</dd></div>
+          <div><dt>학교</dt><dd>한양대학교 ERICA · 미디어학과</dd></div>
+          <div><dt>연락처</dt><dd>010-4166-6136</dd></div>
+          <div class="email-row"><dt>이메일</dt><dd><a href="mailto:dlrlgns0807@gmail.com">dlrlgns0807@gmail.com</a></dd></div>
+        </dl></section>
+        <section><h2>PLAY / 장르를 좋아하는 방식</h2><h3>라인과 중립, 양쪽에서 플레이했습니다.</h3><p>리니지 라이크 장르를 플레이하며 라인과 중립 양쪽의 경험을 쌓아왔습니다. 길드의 위치에 따라 달라지는 경쟁과 협력을 직접 경험했습니다.</p></section>
+        <section><h2>DESIGN / 경험을 기획으로</h2><h3>플레이에서 출발해 시스템으로 구체화합니다.</h3><p>플레이 경험을 기획자의 시선으로 해석하고, 이를 게임 기획으로 연결합니다.</p><div class="design-topics"><span>현상금 시스템</span><span>길드 분배 시스템</span></div></section>
+      </div>
+      <section class="experience-highlight" aria-labelledby="guild-experience-title">
+        <div>
+          <div class="eyebrow">Guild Experience</div>
+          <h2 id="guild-experience-title">1위 라인부터 반왕,<br>그리고 중립 1등 길드의<br>길드 마스터까지</h2>
+          <p>서로 다른 위치의 길드에서 플레이하며, 길드의 전력과 목표에 따라 경쟁 콘텐츠에 참여하는 방식과 구성원 간 협력의 차이를 경험했습니다.</p>
+        </div>
+        <div class="guild-levels" aria-label="경험한 길드 유형">
+          <div class="guild-level first-line-card"><span>LINE</span><strong>라인</strong>
+<p class="guild-master-description">2년에 걸쳐 프모 라인 3번, 일반인 라인 1번 총 4번의 라인 생활을 경험하였습니다.</p>
+<div class="first-line-gallery">
+<figure><a href="assets/garbana-joker-guild.png" target="_blank" rel="noopener"><img src="assets/garbana-joker-guild.png" alt="로드나인 조커 길드 플레이 화면" loading="lazy"></a><figcaption>로드나인 · 조커</figcaption></figure>
+<figure><a href="assets/first-line-lordnine-leader.png" target="_blank" rel="noopener"><img src="assets/first-line-lordnine-leader.png" alt="로드나인 리더 길드 전투 화면" loading="lazy"></a><figcaption>로드나인 · 리더</figcaption></figure>
+<figure><a href="assets/first-line-vampir-myth.png" target="_blank" rel="noopener"><img src="assets/first-line-vampir-myth.png" alt="뱀피르 신화 길드 전투 화면" loading="lazy"></a><figcaption>뱀피르 · 신화</figcaption></figure>
+<figure><a href="assets/first-line-zeus-leader.png" target="_blank" rel="noopener"><img src="assets/first-line-zeus-leader.png" alt="제우스 리더 길드 플레이 화면" loading="lazy"></a><figcaption>제우스 · 리더</figcaption></figure>
+</div></div>
+          <div class="guild-level rebellion-card"><span>REBELLION</span><strong>반왕</strong>
+<p class="guild-master-description">반왕 길드 '조커'에서 활동하며 한 달 만에 반왕에 성공했고, 이후 라인으로 활동했습니다.</p>
+<div class="guild-master-images"><a href="assets/rebellion-success.png" target="_blank" rel="noopener" aria-label="반왕 길드 플레이 사진 크게 보기"><img src="assets/rebellion-success.png" alt="반왕 길드에서 함께 전투하는 플레이 화면" loading="lazy"></a></div></div>
+          <div class="guild-level guild-master-card"><span>GUILD MASTER</span><strong>1등 중립 길드의 길드 마스터</strong>
+<p class="guild-master-description">로드나인 로웨인 10서버의 중립 1등 길드 ‘초식’에서 반년 동안 길드 마스터로 활동하였고 분배 관리도 직접 하였습니다.</p>
+<div class="guild-master-images"><a href="assets/chosik-master-activity.png" target="_blank" rel="noopener"><img src="assets/chosik-master-activity.png" alt="초식 길드원들과 함께한 플레이 화면" loading="lazy"></a><a href="assets/chosik-master-ranking.png" target="_blank" rel="noopener"><img src="assets/chosik-master-ranking.png" alt="초식 길드 순위 및 길드원 기록" loading="lazy"></a></div></div>
+        </div>
+      </section>
+<section class="commitment-box" aria-labelledby="commitment-title">
+        <div class="commitment-heading"><div><div class="eyebrow">PASSION / 플레이에 쏟은 진심</div><h2 id="commitment-title">좋아하는 게임에는,<br>시간도 비용도 아끼지 않았습니다.</h2></div><p>직접 성장하고, 경쟁하고, 더 강해지고 싶었고 플레이에 대한 애정은 꾸준한 투자로도 이어졌습니다.</p></div>
+        <figure class="commitment-proof"><div class="purchase-title"><h3>꾸준한 결제</h3></div><p class="payment-description">라인 품위 전투력을 유지하는 등 다양한 이유로 꾸준히 캐릭터에 투자를 하고 있습니다.</p><div class="payment-strip" aria-label="월별 결제 기록, 날짜 오름차순"><div class="payment-record"><svg xmlns="http://www.w3.org/2000/svg" viewBox="1 35 633 284" role="img" aria-label="2026년 06월 결제 기록"><image href="assets/play-payment-records.png" width="2048" height="631" preserveAspectRatio="none" /></svg></div><div class="payment-record"><svg xmlns="http://www.w3.org/2000/svg" viewBox="311 346 649 284" role="img" aria-label="2026년 07월 결제 기록"><image href="assets/play-payment-records.png" width="2048" height="631" preserveAspectRatio="none" /></svg></div><div class="payment-record"><svg xmlns="http://www.w3.org/2000/svg" viewBox="681 32 669 284" role="img" aria-label="2026년 08월 결제 기록"><image href="assets/play-payment-records.png" width="2048" height="631" preserveAspectRatio="none" /></svg></div><div class="payment-record"><svg xmlns="http://www.w3.org/2000/svg" viewBox="962 334 676 285" role="img" aria-label="2026년 09월 결제 기록"><image href="assets/play-payment-records.png" width="2048" height="631" preserveAspectRatio="none" /></svg></div><div class="payment-record"><svg xmlns="http://www.w3.org/2000/svg" viewBox="1396 0 652 286" role="img" aria-label="2026년 10월 결제 기록"><image href="assets/play-payment-records.png" width="2048" height="631" preserveAspectRatio="none" /></svg></div></div><figcaption style="justify-content:flex-end"><span>kt 콘텐츠 월별 결제 기록</span></figcaption></figure>
+        <div class="purchase-proofs">
+          <figure><div class="purchase-title"><h3>장비 한 부위 구매</h3></div><p>학생 시절, 전설 무기를 갖고 싶다는 목표로 장비 한 부위를 돈을 모아 구매하였습니다.</p><a href="assets/weapon-purchase-record.png" target="_blank" rel="noopener"><img src="assets/weapon-purchase-record.png" alt="로드나인 +9 세루스 활 무기 한 부위 구매 완료 기록, 440,000원" loading="lazy"></a><figcaption class="purchase-caption">바로템 결제 기록</figcaption></figure>
+          <figure><div class="purchase-title"><h3>깡통 전설 계정 구매</h3></div><p>학생 때 전설 아바타를 직접 뽑기에는 무리가 있어 전설 아바타만 있는 빈 계정을 구매하였습니다.</p><a href="assets/account-purchase-record.png" target="_blank" rel="noopener"><img src="assets/account-purchase-record.png" alt="로드나인 깡통 전설 계정 구매 완료 기록, 627,100원" loading="lazy"></a><figcaption class="purchase-caption">바로템 결제 기록</figcaption></figure>
+        </div>
+      </section>
+      <section class="reinvestment-box" aria-labelledby="reinvestment-title">
+        <div class="eyebrow">GAME ECONOMY / 파밍에서 성장까지</div>
+        <h2 id="reinvestment-title">직접 벌고,<br>효율을 따져 성장했습니다.</h2>
+        <p class="reinvestment-intro">플레이로 얻은 재화를 거래하고, 가성비 좋은 패키지를 사서 캐릭터 성장에 재투자했습니다.</p><p class="economy-insight">재화를 꾸준히 벌기 위해서는 게임의 성장 구조와 파밍 효율, 아이템의 수요와 시세를 함께 이해해야 합니다. 직접 플레이하고 거래하며 무엇을 파밍하고 언제 거래할지 판단했고, 한정된 재화를 어디에 투자해야 효율적으로 성장할 수 있는지 고민했습니다. 이 경험을 바탕으로 이용자의 선택과 게임 경제의 흐름을 기획자의 시선으로 바라봅니다.</p>
+        
+        <div class="yearly-records">
+          <figure><div class="yearly-record-heading"><h3>2024</h3><span>거래 기록</span></div><a href="assets/trading-record-2024.png" target="_blank" rel="noopener" aria-label="2024년 거래 기록 크게 보기"><img src="assets/trading-record-2024.png" alt="2024년 거래 내역: 판매 1,480,000원, 구매 145,600원" loading="lazy"></a></figure>
+          <figure><div class="yearly-record-heading"><h3>2025</h3><span>거래 기록</span></div><a href="assets/trading-record-2025.png" target="_blank" rel="noopener" aria-label="2025년 거래 기록 크게 보기"><img src="assets/trading-record-2025.png" alt="2025년 거래 내역: 판매 8,860,100원, 구매 2,210,200원" loading="lazy"></a></figure>
+          <figure><div class="yearly-record-heading"><h3>2026</h3><span>거래 기록</span></div><a href="assets/trading-record-2026.png" target="_blank" rel="noopener" aria-label="2026년 거래 기록 크게 보기"><img src="assets/trading-record-2026.png" alt="2026년 거래 내역: 판매 5,338,000원, 구매 582,200원" loading="lazy"></a></figure>
+        </div>
+        <p class="yearly-records-caption">바로템 연도별 거래 기록</p>
+      </section>
+      <section class="execution-highlight" aria-labelledby="execution-title">
+        <div>
+          <div class="eyebrow">PERSISTENCE / 꾸준함과 실행력</div>
+          <h2 id="execution-title">기획을 실행하고,<br>꾸준히 결과를 만듭니다.</h2>
+          <p>일본인 대상 개인 채널에서 AI를 활용한 영상을 직접 기획하고 주 6편씩 제작해, 3개월 만에 누적 조회수 약 4,000만 회를 달성했습니다.</p>
+          <button type="button" data-jump="activities">채널 운영 경험 보기 <span aria-hidden="true">↗</span></button>
+        </div>
+        <div class="execution-results" aria-label="채널 운영 성과">
+          <div><strong>주 6편</strong><span>직접 기획 · 제작</span></div>
+          <div><strong>3개월</strong><span>꾸준한 채널 운영</span></div>
+          <div><strong>약 4,000만 회</strong><span>누적 조회수</span></div>
+        </div>
+      </section>
+    </section>
+    <section data-view="games" hidden>
+    <div class="eyebrow">Game Experience</div>
+    <h1 class="play-timeline-title">리니지 라이크 플레이 경험 타임라인</h1>
+    <div class="chart-controls">
+      <div class="legend"><span><i style="background:#55b494"></i>중립</span><span><i style="background:#d99a3c"></i>라인</span></div>
+      <p class="chart-help">막대를 누르면 자세한 활동을 볼 수 있습니다.</p>
+    </div>
+    <div class="chart-scroll" role="region" aria-label="가로로 스크롤할 수 있는 게임 플레이 기간 차트" tabindex="0"><div class="chart" id="play-chart"></div></div>
+    <dialog id="play-dialog" class="play-dialog" aria-label="플레이 경험 상세">
+      <div class="play-dialog-toolbar"><button type="button" class="play-dialog-close" aria-label="상세 팝업 닫기" autofocus>×</button></div>
+      <div class="selection" id="play-selection"></div>
+    </dialog>
+      <section class="other-games" aria-labelledby="other-games-title">
+        <div class="eyebrow">OTHER GAMES</div>
+        <h2 id="other-games-title">리니지라이크 외 플레이한 게임들</h2>
+        <div class="other-games-grid">
+        </div>
+      </section>
+    </section>
+    <section data-view="activities" hidden>
+      <div class="eyebrow">ACTIVITIES</div>
+      <h1>활동</h1>
+      <div class="channel-activity">
+        <div class="eyebrow">AI CONTENT / 일본인 대상 채널 운영</div>
+        <h2>주 6편의 영상으로,<br>3개월 만에 약 4,000만 조회수</h2>
+        <p>개인 채널을 개설해 일본인 시청자를 대상으로 AI를 활용하여 영상들을 직접 기획하여 주 6편 제작했습니다. 채널 운영 3개월 만에 누적 조회수 약 4,000만 회를 달성했습니다.</p>
+
+        <figure><a href="assets/channel-analytics-redacted.png" target="_blank" rel="noopener" aria-label="수익을 가린 채널 분석 이미지 크게 보기"><img src="assets/channel-analytics-redacted.png" alt="채널 분석 화면: 조회수 약 3,891만 회, 시청 시간 20.8만 시간, 구독자 증가 7.1천 명. 수익 금액은 모자이크 처리됨." loading="lazy"></a><figcaption>채널 분석 기록 · 예상 수익 비공개</figcaption></figure>
+      </div>
+      <div class="channel-activity volunteer-activity">
+        <div class="eyebrow">VOLUNTEERING / 애니멀메이트 연합 동아리</div>
+        <h2>유기견을 돌보는<br>정기 봉사 활동</h2>
+        <p>유기견 봉사 연합 동아리 애니멀메이트에서 정기적으로 보호소를 방문했습니다. 배변으로 더러워진 케이지를 청소하고, 먹이를 주고 산책을 돕는 등 유기견을 돌보는 활동에 참여했습니다.</p>
+        <figure><a href="assets/animalmate-volunteering.png" target="_blank" rel="noopener" aria-label="애니멀메이트 유기견 봉사 활동 사진 크게 보기"><img src="assets/animalmate-volunteering.png" alt="보호소의 유기견들과 야외에서 강아지를 돌보는 봉사 활동 사진" loading="lazy"></a><figcaption>애니멀메이트 · 유기견 보호소 봉사 활동</figcaption></figure>
+      </div>
+          <div class="channel-activity campus-activity">
+        <div class="eyebrow">CAMPUS APP / 교내 앱 제작 프로젝트</div>
+        <h2>학생들의 편의를 위한<br>앱 기능 기획 및 실현</h2>
+        <p>교내 앱 제작 프로젝트에 참여해 학생들의 편의를 위한 기능 기획을 담당했습니다.</p>
+        <figure><a href="assets/campus-app-project.png" target="_blank" rel="noopener" aria-label="교내 앱 프로젝트 기획 자료와 화면 크게 보기"><img src="assets/campus-app-project.png" alt="교내 앱 제작 프로젝트 기획 자료와 앱 화면: 셔틀버스 시간표 및 노선 지도 등" loading="lazy"></a><figcaption>교내 앱 제작 프로젝트 · 기획 자료 및 앱 화면</figcaption></figure>
+      </div>
+      <div class="channel-activity capstone-activity">
+        <div class="eyebrow">CAPSTONE DESIGN / 자살 예방 캠페인</div>
+        <h2>자살 예방 캠페인,<br>기획부터 발표까지</h2>
+        <p>캡스톤 디자인 프로젝트에서 자살 예방 캠페인의 기획을 담당했습니다. 캠페인의 메시지와 구성을 기획하고, 최종 발표까지 마무리했습니다.</p>
+        <figure><a href="assets/capstone-prevention-campaign.png" target="_blank" rel="noopener" aria-label="캡스톤 디자인 캠페인 기획 자료 크게 보기"><img src="assets/capstone-prevention-campaign.png" alt="자살 예방 캠페인 캡스톤 디자인 회의록과 캠페인 화면 구성 자료" loading="lazy"></a><figcaption>캡스톤 디자인 · 회의록 및 캠페인 기획 자료</figcaption></figure>
+      </div>
+</section>
+    <section data-view="projects" hidden>
+      <div class="eyebrow">Projects</div>
+      <h1>포트폴리오</h1>
+      <p class="intro">직접 작성한 창작 시스템 기획서입니다. 카드를 눌러 PDF를 새 탭에서 열 수 있습니다.</p>
+      <div class="portfolio-grid">
+        <a class="work-card bounty-card" href="pdfs/01_창작_리니지라이크_시스템_현상금.pdf" target="_blank" rel="noopener">
+          <div class="doc-type">System Design · Original</div>
+          <h2>리니지라이크 현상금 시스템</h2>
+          <p>현상금 시스템을 주제로 작성한 창작 기획서입니다.</p>
+          <span class="open-link">PDF 기획서 열기 ↗</span>
+        </a>
+        <a class="work-card guild-card" href="pdfs/02_창작_제우스_시스템_길드분배.pdf" target="_blank" rel="noopener">
+          <div class="doc-type">System Design · Original</div>
+          <h2>제우스 길드 분배 시스템</h2>
+          <p>길드 분배 시스템을 주제로 작성한 창작 기획서입니다.</p>
+          <span class="open-link">PDF 기획서 열기 ↗</span>
+        </a>
+      </div>
+    </section>
+    <section data-view="contact" hidden>
+      <div class="eyebrow">Contact</div>
+      <h1>연락처</h1>
+      <div class="placeholder"><h2>연락 정보를 추가할 수 있어요</h2><p>이메일이나 링크는 실제로 공개할 정보를 정한 뒤 입력합니다.</p></div>
+    </section>
+  </main>
+  <script>
+    document.querySelectorAll('[data-jump]').forEach(button => {
+      button.addEventListener('click', () => {
+        document.querySelector('[data-page="' + button.dataset.jump + '"]').click();
+        window.scrollTo({top:0, behavior:'smooth'});
+      });
+    });
+    const asOf = '2026-10-21';
+    // Approximate role transitions are for drawing only; descriptions retain the user's precision.
+    const experiences = [
+      ['로드나인', '로웨인', '2024-07-12', '2025-02-01', "라인 '리더'길드 (스트리머 팡이요 연합)", 'line', 0, '2024.07.12 ~ 2025년 1월'],
+      ['로드나인', '로웨인', '2025-02-01', '2025-10-03', "중립 '초식' 길드 (중립 1등 길드) + 길드 마스터", 'neutral', 0, '2025년 2월 ~ 2025.10.03'],
+      ['로드나인', '가르바나', '2025-10-04', '2025-11-01', "중립 '저승사자' 길드", 'neutral', 1, '2025.10.04 ~ 2025년 11월 초'],
+      ['로드나인', '가르바나', '2025-11-01', '2026-04-28', "반왕 '조커' 길드 (일반인 길드) → 반왕 성공 후 라인", 'line', 1, '2025년 11월 초 ~ 2026년 4월'],
+      ['로드나인', '가르바나', '2026-04-28', null, '다시 중립으로 활동', 'neutral', 1, '2026.04.27 이후 ~ 현재'],
+      ['오딘', '뇨도르', '2025-06-25', '2025-08-25', "중립 '다시 모여' 길드", 'neutral', 0, '2025.06.25 ~ 2025.08.25'],
+      ['뱀피르', '다미르', '2025-08-26', '2025-11-26', "라인 '신화' 길드 (스트리머 알트 연합)", 'line', 0, '2025.08.26 ~ 2025년 11월'],
+      ['솔: 인챈트', '린델', '2026-06-18', null, '중립', 'neutral', 0, '2026.06.18 ~ 현재'],
+      ['제우스', '아테나', '2026-08-26', null, "라인 '리더'길드 (스트리머 팡이요 연합)", 'line', 0, '2026.08.26 ~ 현재'],
+      ['이클립스', '헤스카리온', '2026-09-10', null, '중립', 'neutral', 0, '2026.09.10 ~ 현재']
+    ];
+    const chartStart = Date.parse('2024-07-01T00:00:00Z');
+    const chartEnd = Date.parse(asOf + 'T00:00:00Z');
+    const position = (date) => 1 + (Date.parse(date + 'T00:00:00Z') - chartStart) / (chartEnd - chartStart) * 98;
+    const formatDate = (date) => date.replaceAll('-', '.');
+    const chart = document.getElementById('play-chart');
+    const ticks = [];
+    for (let year = 2024; year <= 2026; year++) {
+      for (let month = 1; month <= 12; month++) {
+        const date = `${year}-${String(month).padStart(2, '0')}-01`;
+        if (position(date) >= 0 && position(date) < 100 && month % 3 === 1) ticks.push({ date, year, month });
+      }
+    }
+    function makeTrack(axis = false) {
+      const track = document.createElement('div');
+      track.className = 'track';
+      ticks.forEach(({date, year, month}, index) => {
+        const line = document.createElement('span');
+        line.className = 'gridline'; line.style.left = position(date) + '%'; track.append(line);
+        if (axis) {
+          const label = document.createElement('span'); label.className = 'axis-label';
+          const left = position(date);
+          label.style.left = left + '%';
+          label.textContent = `${year}.${String(month).padStart(2, '0')}`; track.append(label);
+          const dot = document.createElement('span'); dot.className = 'axis-dot'; dot.style.left = left + '%'; track.append(dot);
+        }
+      });
+      return track;
+    }
+    const axis = document.createElement('div'); axis.className = 'chart-row axis';
+    const axisTitle = document.createElement('div'); axisTitle.className = 'row-label'; axisTitle.textContent = '게임 / 서버';
+    axis.append(axisTitle, makeTrack(true)); chart.append(axis);
+    [...new Set(experiences.map(item => JSON.stringify([item[0], item[1]])))].forEach(key => {
+      const [game, rowServer] = JSON.parse(key);
+      const entries = experiences.filter(item => item[0] === game && item[1] === rowServer);
+      const row = document.createElement('div'); row.className = 'chart-row' + (entries.some(item => !item[3]) ? ' current' : '');
+      const label = document.createElement('div'); label.className = 'row-label';
+      const title = document.createElement('strong'); title.textContent = rowServer ? `${game} (${rowServer} 서버)` : game;
+      label.append(title);
+      const track = makeTrack();
+      entries.forEach(([, server, start, end, activity, role, lane, period], entryIndex) => {
+      const bar = document.createElement('button');
+      bar.type = 'button'; bar.className = 'play-bar' + (end ? '' : ' live');
+      const previousEntry = entries[entryIndex - 1];
+      const nextEntry = entries[entryIndex + 1];
+      const joinsPrevious = previousEntry && previousEntry[3] === start;
+      const joinsNext = nextEntry && end && nextEntry[2] === end;
+      if (joinsPrevious) bar.classList.add('connected-left');
+      if (joinsNext) bar.classList.add('connected-right');
+      bar.style.left = position(start) + '%';
+      bar.style.width = (position(end || asOf) - position(start)) + '%';
+      bar.style.setProperty('--bar', role === 'line' ? '#e3ad58' : '#68c3a1');
+      bar.style.top = '21px';
+      bar.textContent = role === 'line' ? '라인' : '중립';
+      bar.title = `${game}${server ? ' · ' + server : ''}\n${period}\n${activity}`;
+      bar.setAttribute('aria-label', bar.title);
+      bar.addEventListener('click', () => {
+        const selection = document.getElementById('play-selection'); selection.replaceChildren(); document.getElementById('play-dialog').showModal();
+        const displayServer = game === '로드나인' && server === '로웨인' ? '로웨인10'
+          : game === '로드나인' && server === '가르바나' && (start === '2025-10-04' || start === '2025-11-01') ? '가르바나6'
+          : game === '로드나인' && server === '가르바나' && start === '2026-04-28' ? '가르바나9' : server;
+        const heading = document.createElement('strong'); heading.textContent = `${game}${displayServer ? ' (' + displayServer + ')' : ''} | ${period}`;
+        const description = document.createElement('p'); description.textContent = activity + (end || game === '제우스' ? '' : ' · 플레이 중');
+        selection.append(heading, description);
+        if (game === '제우스') {
+          const gallery = document.createElement('div'); gallery.className = 'zeus-gallery';
+          const screenshot = document.createElement('img');
+          screenshot.src = 'assets/zeus-athena2-character.png';
+          screenshot.alt = '제우스 아테나 서버 캐릭터 사진';
+          screenshot.className = 'zeus-character';
+          const chat = document.createElement('img'); chat.className = 'zeus-chat';
+          chat.src = 'assets/zeus-leader-chat.png';
+          chat.alt = '채팅 내용이 모자이크 처리된 제우스 리더 길드 카카오톡방';
+          const characterFigure = document.createElement('figure'); characterFigure.className = 'zeus-character';
+          const characterCaption = document.createElement('figcaption'); characterCaption.textContent = '인게임 캐릭 이미지';
+          characterFigure.append(screenshot, characterCaption);
+          const chatFigure = document.createElement('figure'); chatFigure.className = 'zeus-chat';
+          const chatCaption = document.createElement('figcaption'); chatCaption.textContent = '라인 카톡 이미지';
+          chatFigure.append(chat, chatCaption);
+          gallery.append(characterFigure, chatFigure); selection.append(gallery);
+        }
+        if (game === '로드나인' && server === '가르바나' && start === '2025-10-04') {
+          const screenshot = document.createElement('img');
+          screenshot.src = 'assets/garbana6-trade.png';
+          screenshot.alt = '로드나인 가르바나6 서버 거래 내역';
+          const story = document.createElement('div'); story.className = 'activity-story trade-story';
+          screenshot.style.cssText = 'display:block;width:100%;max-width:700px;height:auto;border-radius:10px';
+          const text = document.createElement('p');
+          text.textContent = '전설 아바타를 뽑기로 직접 획득하기는 어렵다고 판단해 거래 사이트에서 전설 아바타를 구매한 뒤 게임을 시작했습니다. 구매 과정에서 판매자와 인연이 닿아 ‘저승사자’ 길드에 합류했습니다. 리니지라이크 경험이 많은 길드원들과 친해지며 함께 게임을 즐겼습니다.';
+          const figure = document.createElement('figure');
+          const caption = document.createElement('figcaption'); caption.textContent = '바로템 사이트 거래';
+          figure.append(screenshot, caption);
+          story.append(figure, text); selection.append(story);
+        }
+        if (game === '이클립스') {
+          const eclipseDescription = document.createElement('p');
+          eclipseDescription.textContent = '리니지 라이크 게임마다 다른 성장 방식과 시스템을 직접 경험함으로써 같은 장르 안에서 서로 다른 재미를 만드는 요소를 살펴보고 있습니다.';
+          eclipseDescription.style.cssText = 'margin:16px 0 22px;max-width:760px;line-height:1.9';
+
+          const screenshot = document.createElement('img');
+          screenshot.src = 'assets/eclipse-character.png';
+          screenshot.alt = '이클립스 헤스카리온 서버 캐릭터 활동 사진';
+          screenshot.style.cssText = 'display:block;width:100%;max-width:345px;height:auto;border-radius:10px';
+          const figure = document.createElement('figure'); figure.className = 'character-figure';
+          const caption = document.createElement('figcaption'); caption.textContent = '인게임 캐릭 이미지';
+          figure.append(screenshot, caption);
+          const story = document.createElement('div'); story.className = 'activity-story parallel-game-story';
+          story.append(figure, eclipseDescription); selection.append(story);
+        }
+        if (game === '솔: 인챈트') {
+          const solDescription = document.createElement('p');
+          solDescription.textContent = '리니지 라이크 게임마다 다른 성장 방식과 시스템을 직접 경험함으로써 같은 장르 안에서 서로 다른 재미를 만드는 요소를 살펴보고 있습니다.';
+          solDescription.style.cssText = 'margin:16px 0 22px;max-width:760px;line-height:1.9';
+
+          const screenshot = document.createElement('img');
+          screenshot.src = 'assets/sol-enchant-character.png';
+          screenshot.alt = '솔: 인챈트 린델 서버 캐릭터 활동 사진';
+          screenshot.style.cssText = 'display:block;width:100%;height:auto;border-radius:10px';
+          const figure = document.createElement('figure'); figure.className = 'character-figure';
+          figure.style.maxWidth = '387px';
+          const caption = document.createElement('figcaption'); caption.textContent = '인게임 캐릭터';
+          figure.append(screenshot, caption);
+          const story = document.createElement('div'); story.className = 'activity-story parallel-game-story';
+          story.append(figure, solDescription); selection.append(story);
+        }
+        if (game === '로드나인' && server === '가르바나' && role === 'line') {
+          const story = document.createElement('div'); story.className = 'activity-story';
+          const screenshot = document.createElement('img');
+          screenshot.src = 'assets/garbana-joker-guild.png';
+          screenshot.alt = '로드나인 가르바나 조커 길드 활동 사진';
+          const text = document.createElement('p');
+          text.textContent = '밤도깨비 길드원들과 함께 오라짱님이 창설한 ‘조커’ 길드에 참여해 기존 라인이었던 ‘밤도깨비’ 길드를 상대로 반왕 활동을 했습니다. 약 한 달 만에 반왕에 성공했고, 이후 라인 길드로 활동했습니다.';
+          const figure = document.createElement('figure');
+          const caption = document.createElement('figcaption'); caption.textContent = "'조커'길드";
+          figure.append(screenshot, caption);
+          story.append(figure, text); selection.append(story);
+        }
+        if (game === '뱀피르') {
+          const story = document.createElement('div'); story.className = 'activity-story vampir-story';
+          const screenshot = document.createElement('img');
+          screenshot.src = 'assets/vampir-myth-clan.png';
+          screenshot.alt = '뱀피르 신화 길드와 스트리머 알트 연합 활동 사진';
+          const text = document.createElement('p');
+          text.append('다미르 서버에서 ');
+          const nickname = document.createElement('span');
+          nickname.textContent = "'하눌'";
+          nickname.style.cssText = 'color:#ffdf5d;font-weight:700';
+          text.append(nickname, ' 캐릭터로 3개월 동안 라인 생활을 하였습니다.');
+          const figure = document.createElement('figure');
+          const caption = document.createElement('figcaption'); caption.textContent = "'신화'길드 보스 쟁";
+          figure.append(screenshot, caption);
+          story.append(figure, text); selection.append(story);
+        }
+        if (game === '오딘') {
+          const story = document.createElement('div'); story.className = 'activity-story odin-story';
+          const screenshot = document.createElement('img');
+          screenshot.src = 'assets/odin-dasimo-character.png';
+          screenshot.alt = '오딘 다시 모여 길드 캐릭터 사진';
+          const text = document.createElement('p');
+          text.append('로드나인을 통해 리니지라이크 장르의 재미를 알게 된 후, 대표작으로 알려진 ‘오딘’의 신규 서버 오픈 소식을 접했습니다. 어떤 게임인지 궁금해 시작했고, ');
+          const nickname = document.createElement('span');
+          nickname.textContent = "'돈먹은'";
+          nickname.style.cssText = 'color:#ffdf5d;font-weight:700';
+          text.append(nickname, ' 캐릭으로 2달 동안 중립 플레이 하였습니다.');
+          const figure = document.createElement('figure');
+          const caption = document.createElement('figcaption'); caption.textContent = '인게임 캐릭 이미지';
+          figure.append(screenshot, caption);
+          story.append(figure, text); selection.append(story);
+        }
+        if (game === '로드나인' && server === '로웨인' && role === 'line') {
+          const story = document.createElement('div'); story.className = 'activity-story';
+          const screenshot = document.createElement('img'); screenshot.src = 'assets/rowein-line-original.png';
+          screenshot.alt = '로드나인 로웨인 10 서버에서 다로시 캐릭터로 참여한 라인 활동';
+          const text = document.createElement('p');
+          text.append('로웨인 10 서버에서 ');
+          const characterName = document.createElement('span');
+          characterName.textContent = "'다로시'";
+          characterName.style.cssText = 'color:#ffdf5d;font-weight:700';
+          text.append(characterName, ' 캐릭터로 리니지라이크 장르에 처음 입문했으며, 6개월 동안 라인 생활을 했습니다.');
+          const figure = document.createElement('figure');
+          const caption = document.createElement('figcaption'); caption.textContent = '리더 길드 보스 활동';
+          figure.append(screenshot, caption);
+          story.append(figure, text); selection.append(story);
+        }
+        if (game === '로드나인' && server === '로웨인' && role === 'neutral') {
+          const gallery = document.createElement('div'); gallery.className = 'activity-gallery';
+          [
+            ['assets/rowein-chosik-activity.png', '초식 길드 활동 사진', 'activity-photo'],
+            ['assets/rowein-chosik-ranking.png', '길드 분배 엑셀 사진', 'ranking-photo']
+          ].forEach(([src, caption, className]) => {
+            const figure = document.createElement('figure'); figure.className = className;
+            const link = document.createElement('a'); link.href = src; link.target = '_blank'; link.rel = 'noopener';
+            const img = document.createElement('img'); img.src = src; img.alt = caption;
+            const figcaption = document.createElement('figcaption'); figcaption.textContent = caption;
+            link.append(img); figure.append(link, figcaption); gallery.append(figure);
+          });
+          const detail = document.createElement('div'); detail.className = 'guild-detail';
+          const story = document.createElement('div'); story.className = 'guild-story';
+          [
+            '라인 활동을 이어가며 삶이 피폐해진다는 느낌을 받아, 닉네임을 ‘돈먹은’으로 변경하고 중립 ‘초식’ 길드에 합류했습니다.',
+            '입단 약 2개월 후 기존 길드 마스터가 게임을 그만두면서 운영을 이어받았습니다. 이후 4개월 동안 길드 마스터로 활동하며, 엑셀을 활용해 길드 보상 분배를 관리했습니다.'
+          ].forEach(content => {
+            const paragraph = document.createElement('p');
+            const nickname = '‘돈먹은’';
+            if (content.includes(nickname)) {
+              const [before, after] = content.split(nickname);
+              const highlight = document.createElement('span');
+              highlight.textContent = nickname;
+              highlight.style.cssText = 'color:#000;font-weight:700';
+              paragraph.append(before, highlight, after);
+            } else {
+              paragraph.textContent = content;
+            }
+            story.append(paragraph);
+          });
+          detail.append(gallery, story); selection.append(detail);
+        }
+      });
+      track.append(bar);
+      });
+      row.append(label, track); chart.append(row);
+    });
+    const playDialog = document.getElementById('play-dialog');
+    playDialog.querySelector('.play-dialog-close').addEventListener('click', () => playDialog.close());
+    playDialog.addEventListener('close', () => { playDialog.scrollTop = 0; });
+    const menuButtons = document.querySelectorAll('[data-page]');
+    const views = document.querySelectorAll('[data-view]');
+    menuButtons.forEach((button) => button.addEventListener('click', () => {
+      const target = button.dataset.page;
+      views.forEach((view) => { view.hidden = view.dataset.view !== target; });
+      menuButtons.forEach((item) => item.classList.toggle('active', item === button));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }));
+  </script>
+</body>
+</html>
